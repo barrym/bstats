@@ -13,5 +13,5 @@
                   stdlib
                  ]},
   {mod, { bstats_app, []}},
-  {env, []}
+  {env, [{host, "localhost"}, {port, 6379}]}
  ]}.

@@ -42,8 +42,8 @@ start_link() ->
 
 -spec init([]) -> {ok, state()}.
 init([]) ->
-    Host = application:get_env(bstats, server),
-    Port = application:get_env(bstats, port),
+    {ok, Host} = application:get_env(bstats, host),
+    {ok, Port} = application:get_env(bstats, port),
     case bstats_redis_connections_sup:start_redis_connection(Host, Port) of
         {ok, Connection} ->
             {ok, #state{connection = Connection, host = Host, port = Port, redis_up = true}};
