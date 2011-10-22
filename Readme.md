@@ -1,0 +1,3 @@
+Requires rebar
+
+make
