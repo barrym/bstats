@@ -13,10 +13,6 @@
         register_all/0
     ]).
 
-
-% lists:map(fun(_) -> spawn(fun() -> lists:foreach(fun(_) -> bstats:inc_counter(integer_to_list(crypto:rand_uniform(1,10))) end, lists:seq(1,10000)) end) end, lists:seq(1,100)).
-% lists:map(fun(_) -> spawn(fun() -> lists:foreach(fun(_) -> bstats:inc_counter(foo) end, lists:seq(1,10000)) end) end, lists:seq(1,100)).
-
 register_all() ->
     lists:foreach(fun(Counter) ->
                 bstats_redis:sadd("bstats:counters", Counter)
@@ -49,14 +45,6 @@ get_counter_info(Name) ->
 
 get_gauge_info(Name) ->
     gen_server:call(?GAUGE_SERVER_NAME(Name), get_info).
-
-% call_or_start(Name, Args) ->
-%     try
-%         gen_server:call(?COUNTER_SERVER_NAME(Name), Args)
-%     catch exit:{noproc, {gen_server, call, _}} ->
-%         bstats_sup:start_server(Name),
-%         call_or_start(Name, Args)
-%     end.
 
 cast_or_start(Name, Type, Args) ->
     case Type of
