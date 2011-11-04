@@ -7,11 +7,11 @@
 %% API
 -export([
         start_link/0,
-        start_server/1,
+        start_server/2,
         get_counters/0,
         del_all_counters/0,
-        disable_counter/1,
-        enable_counter/1
+        disable_counter/2,
+        enable_counter/2
     ]).
 
 %% Supervisor callbacks
@@ -27,27 +27,27 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
--spec start_server(atom()) -> {ok, pid()} | {error, term()}.
-start_server(Name) ->
-    supervisor:start_child(?MODULE, [Name]).
+-spec start_server(atom(), atom()) -> {ok, pid()} | {error, term()}.
+start_server(Namespace, Counter) ->
+    supervisor:start_child(?MODULE, [Namespace, Counter]).
 
 get_counters() ->
     lists:map(fun({_, Pid, _, _}) ->
-                {value, {name, Name}} = lists:keysearch(name, 1, gen_server:call(Pid, get_info)),
-                Name
+                {value, {namespace, Namespace}} = lists:keysearch(namespace, 1, gen_server:call(Pid, get_info)),
+                {value, {counter, Counter}} = lists:keysearch(counter, 1, gen_server:call(Pid, get_info)),
+                {Namespace, Counter}
         end, supervisor:which_children(?MODULE)).
 
 del_all_counters() ->
-    lists:foreach(fun(Name) ->
-                bstats:del_counter(Name)
+    lists:foreach(fun({Namespace, Counter}) ->
+                bstats:del_counter(Namespace, Counter)
         end, get_counters()).
 
-disable_counter(Name) ->
-    gen_server:call(?COUNTER_SERVER_NAME(Name), disable_counter).
+disable_counter(Namespace, Counter) ->
+    gen_server:call(?COUNTER_SERVER_NAME(Namespace, Counter), disable_counter).
 
-enable_counter(Name) ->
-    gen_server:call(?COUNTER_SERVER_NAME(Name), enable_counter).
-
+enable_counter(Namespace, Counter) ->
+    gen_server:call(?COUNTER_SERVER_NAME(Namespace, Counter), enable_counter).
 
 %% =============================================================================
 %% Supervisor callbacks
