@@ -11,5 +11,5 @@ clean:
 deps:
 	@$(REBAR) get-deps
 
-console:
-	erl -pa ebin/ -pa deps/*/ebin/
+console: compile
+	erl -pa ebin/ -pa deps/*/ebin/ -eval 'application:start(bstats)'
