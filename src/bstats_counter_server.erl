@@ -22,7 +22,7 @@ start_link(Namespace, Counter) ->
 init([Namespace, Counter]) ->
     bstats_redis:sadd("bstats:namespaces", Namespace),
     bstats_redis:sadd("bstats:" ++ atom_to_list(Namespace) ++ ":counters", Counter),
-    timer:apply_interval(1000, gen_server, cast, [?COUNTER_SERVER_NAME(Namespace, Counter), write_to_redis]),
+    timer:apply_after(1000, gen_server, cast, [?COUNTER_SERVER_NAME(Namespace, Counter), write_to_redis]),
     {ok, #state{namespace = Namespace, counter = Counter}}.
 
 handle_info(_, State) ->
@@ -71,6 +71,7 @@ handle_cast(write_to_redis, #state{namespace = Namespace, counter = Counter, cou
                         bstats_redis:expire(HourKey, 3600 * ?PER_HOUR_LIMIT)
                 end)
     end,
+    timer:apply_after(1000, gen_server, cast, [?COUNTER_SERVER_NAME(Namespace, Counter), write_to_redis]),
     {noreply, State#state{previous_counter_value = CounterValue}};
 
 handle_cast(del_counter, State) ->
